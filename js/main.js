@@ -3,20 +3,16 @@
 
 // Constants & global variables
 var NUMBER_OF_ADS = 8;
-var PIN_WIDTH = 50;
-var PIN_HEIGHT = 70; // Не получилось найти их ширину и высоту с помощью js. Пробовала pinTag.style.width — ничего не выдает. Пробовала pinTag.offsetWidth; выдает ноль. Пробовала даже выносить тег из фрагмента в боди, но все равно 0. Не понимаю
 var mapTag = document.querySelector('.map');
 
-
 // Create random number from min max range.
-
 var getRandomNumber = function (min, max) {
   return Math.round(Math.random() * (max - min) + min)
 };
 
 // Get a string from array.
 var getString = function (array, min, max) {
-  var randomNumber = Math.round(Math.random() * (max - min) + min);
+  var randomNumber = getRandomNumber(min, max);
   return array[randomNumber];
 };
 
@@ -57,6 +53,18 @@ var createMockData = function (numberOfObjects) {
 };
 
 
+// Найти ширину и высоту пина
+var findObjectFromTemplateSize = function (object, whereToInsert, className) {
+  whereToInsert.appendChild(object.cloneNode(true));
+  var objects = whereToInsert.querySelectorAll(className);
+  var objectSize = {
+    width: objects[1].offsetWidth,
+    height: objects[1].offsetHeight
+  };
+  whereToInsert.removeChild(objects[1]);
+  return objectSize;
+}
+
 // Create DOM Elements
 var createDOMElements = function (array) {
   var fragmentTag = document.createDocumentFragment();
@@ -64,11 +72,13 @@ var createDOMElements = function (array) {
     .querySelector('#pin')
     .content.querySelector('.map__pin');
   var pinAvatarTag = pinTag.querySelector('img');
+  var pinSize = findObjectFromTemplateSize(pinTag, mapTag, '.map__pin');
+
 
   for (var i = 0; i < array.length; i++) {
     pinAvatarTag.src = array[i].author.avatar;
-    pinTag.style.left = array[i].location.x + PIN_WIDTH / 2 + 'px';
-    pinTag.style.top = array[i].location.y + PIN_HEIGHT + 'px';
+    pinTag.style.left = array[i].location.x + pinSize.width / 2 + 'px';
+    pinTag.style.top = array[i].location.y + pinSize.height + 'px';
     pinAvatarTag.alt = array[i].offer.type;
     fragmentTag.appendChild(pinTag.cloneNode(true));
   }
@@ -76,7 +86,6 @@ var createDOMElements = function (array) {
 }
 
 // Execute all
-
 var renderPins = function (numberOfObjects) {
   var pinsListTag = document.querySelector('.map__pins');
   var pins = createMockData(numberOfObjects);
